@@ -1,6 +1,6 @@
 package com.hisujung.microservice.entity;
 
-import com.hisujung.web.BaseTimeEntity;
+import com.hisujung.microservice.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,9 +14,11 @@ public class LikeExternalAct extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    //@ManyToOne(fetch = FetchType.LAZY)
+    //@JoinColumn(name = "member_id")
+    //private Member member;
+
+    private Long memberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "external_act_id")
@@ -24,7 +26,7 @@ public class LikeExternalAct extends BaseTimeEntity {
 
     @Builder
     public LikeExternalAct(Member member, ExternalAct activity) {
-        this.member = member;
+        //this.member = member;
         this.activity = activity;
     }
 
