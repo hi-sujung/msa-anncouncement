@@ -1,8 +1,8 @@
 package com.hisujung.microservice.repository;
 
-import com.hisujung.web.entity.ExternalAct;
-import com.hisujung.web.entity.LikeExternalAct;
-import com.hisujung.web.entity.Member;
+import com.hisujung.microservice.entity.ExternalAct;
+import com.hisujung.microservice.entity.LikeExternalAct;
+import com.hisujung.microservice.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
