@@ -1,7 +1,7 @@
 package com.hisujung.microservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.hisujung.web.BaseTimeEntity;
+import com.hisujung.microservice.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
