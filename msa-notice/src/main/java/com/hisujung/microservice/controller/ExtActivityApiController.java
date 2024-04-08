@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Slf4j
-@RequestMapping("/externalact")
+@RequestMapping("notice/externalact")
 @RequiredArgsConstructor
 @RestController
 public class ExtActivityApiController {
