@@ -12,7 +12,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/univactivity")
+@RequestMapping("notice/univactivity")
 public class UnivActivityApiController {
 
     private final UnivActService univActService;
