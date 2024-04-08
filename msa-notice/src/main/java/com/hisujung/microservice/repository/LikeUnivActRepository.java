@@ -1,8 +1,8 @@
 package com.hisujung.microservice.repository;
 
-import com.hisujung.web.entity.LikeUnivAct;
-import com.hisujung.web.entity.Member;
-import com.hisujung.web.entity.UnivActivity;
+import com.hisujung.microservice.entity.LikeUnivAct;
+import com.hisujung.microservice.entity.Member;
+import com.hisujung.microservice.entity.UnivActivity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
