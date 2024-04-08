@@ -1,9 +1,7 @@
 package com.hisujung.microservice.dto;
 
-import com.hisujung.web.entity.LikeUnivAct;
-import com.hisujung.web.entity.Member;
-import com.hisujung.web.entity.UnivActivity;
-import lombok.Builder;
+import com.hisujung.microservice.entity.LikeUnivAct;
+import com.hisujung.microservice.entity.UnivActivity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,19 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LikeUnivActRequestDto {
 
-    private Member member;
-    private UnivActivity univActivity;
+    private Long univActivityId;
 
-    @Builder
-    public LikeUnivActRequestDto(Member member, UnivActivity univActivity) {
-        this.member = member;
-        this.univActivity = univActivity;
-    }
-
-    public LikeUnivAct toEntity() {
+    public LikeUnivAct toEntity(UnivActivity u) {
         return LikeUnivAct.builder()
-                .member(member)
-                .univActivity(univActivity)
+                .univActivity(u)
                 .build();
     }
 }

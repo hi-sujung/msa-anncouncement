@@ -1,7 +1,7 @@
 package com.hisujung.microservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.hisujung.web.entity.UnivActivity;
+import com.hisujung.microservice.entity.UnivActivity;
 import lombok.Getter;
 
 import java.time.LocalDateTime;

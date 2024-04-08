@@ -1,20 +1,36 @@
 package com.hisujung.microservice.dto;
 
-import com.hisujung.web.entity.LikeUnivAct;
-import com.hisujung.web.entity.Member;
-import com.hisujung.web.entity.UnivActivity;
+import com.hisujung.microservice.entity.LikeUnivAct;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Getter
 public class LikeUnivActListDto {
     Long id;
-    Member member;
-    UnivActivity univActivity;
+
+    String title;
+
+    String postDepartment;
+
+    String description;
+
+    //올라온 날짜
+    LocalDateTime startDate;
+
+    //마감기한
+    LocalDateTime deadline;
+
+    String link;
 
 
     public LikeUnivActListDto(LikeUnivAct entity) {
         this.id = entity.getId();
-        this.member = entity.getMember();
-        this.univActivity = entity.getUnivActivity();
+        this.title = entity.getUnivActivity().getTitle();
+        this.description = entity.getUnivActivity().getDescription();
+        this.startDate = entity.getUnivActivity().getStartDate();
+        this.deadline = entity.getUnivActivity().getDeadline();
+        this.postDepartment = entity.getUnivActivity().getPostDepartment();
+        this.link = entity.getUnivActivity().getLink();
     }
 }

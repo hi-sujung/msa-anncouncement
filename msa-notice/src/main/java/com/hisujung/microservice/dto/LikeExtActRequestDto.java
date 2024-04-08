@@ -1,9 +1,7 @@
 package com.hisujung.microservice.dto;
 
-import com.hisujung.web.entity.ExternalAct;
-import com.hisujung.web.entity.LikeExternalAct;
-import com.hisujung.web.entity.Member;
-import lombok.Builder;
+import com.hisujung.microservice.entity.ExternalAct;
+import com.hisujung.microservice.entity.LikeExternalAct;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,19 +10,11 @@ import lombok.NoArgsConstructor;
 //@AllArgsConstructor
 public class LikeExtActRequestDto {
 
-    private Member member;
-    private ExternalAct externalAct;
+    private Long externalActId;
 
-    @Builder
-    public LikeExtActRequestDto(Member member, ExternalAct externalAct) {
-        this.member = member;
-        this.externalAct = externalAct;
-    }
-
-    public LikeExternalAct toEntity() {
+    public LikeExternalAct toEntity(ExternalAct e) {
         return LikeExternalAct.builder()
-                .member(member)
-                .activity(externalAct)
+                .activity(e)
                 .build();
     }
 }

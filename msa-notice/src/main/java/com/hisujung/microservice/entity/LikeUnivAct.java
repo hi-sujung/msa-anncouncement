@@ -1,6 +1,6 @@
 package com.hisujung.microservice.entity;
 
-import com.hisujung.web.BaseTimeEntity;
+import com.hisujung.microservice.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,17 +14,15 @@ public class LikeUnivAct extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    private String memberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "univ_activity_id")
     private UnivActivity univActivity;
 
     @Builder
-    public LikeUnivAct(Member member, UnivActivity univActivity) {
-        this.member = member;
+    public LikeUnivAct(String memberId, UnivActivity univActivity) {
+        this.memberId = memberId;
         this.univActivity = univActivity;
     }
 }
