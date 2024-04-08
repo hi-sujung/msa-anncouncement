@@ -1,6 +1,6 @@
 package com.hisujung.microservice.repository;
 
-import com.hisujung.web.entity.ExternalAct;
+import com.hisujung.microservice.entity.ExternalAct;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

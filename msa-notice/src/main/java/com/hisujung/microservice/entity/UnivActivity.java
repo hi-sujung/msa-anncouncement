@@ -1,7 +1,7 @@
 package com.hisujung.microservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.hisujung.web.BaseTimeEntity;
+import com.hisujung.microservice.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,12 +23,15 @@ public class UnivActivity extends BaseTimeEntity {
 
     private String postDepartment;
 
+    @Column(length = 3000)
+    private String description;
+
     //올라온 날짜
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime startDate;
 
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-//    private LocalDateTime deadline;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+    private LocalDateTime deadline;
 
     private String link;
 
@@ -37,11 +40,11 @@ public class UnivActivity extends BaseTimeEntity {
 
 
     @Builder
-    public UnivActivity(String title, String postDepartment, LocalDateTime startDate, String link) {
+    public UnivActivity(String title, String postDepartment, LocalDateTime startDate, LocalDateTime deadline, String link) {
         this.title = title;
         this.postDepartment = postDepartment;
         this.startDate = startDate;
-        //this.deadline = deadline;
+        this.deadline = deadline;
         this.link = link;
     }
 }
