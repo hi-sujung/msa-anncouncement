@@ -1,12 +1,10 @@
 package com.hisujung.microservice.service;
 
-import com.hisujung.web.dto.LikeUnivActRequestDto;
-import com.hisujung.web.dto.UnivActListResponseDto;
-import com.hisujung.web.entity.LikeUnivAct;
-import com.hisujung.web.entity.Member;
-import com.hisujung.web.entity.UnivActivity;
-import com.hisujung.web.jpa.LikeUnivActRepository;
-import com.hisujung.web.jpa.UnivActivityRepository;
+import com.hisujung.microservice.dto.UnivActListResponseDto;
+import com.hisujung.microservice.entity.LikeUnivAct;
+import com.hisujung.microservice.entity.UnivActivity;
+import com.hisujung.microservice.repository.LikeUnivActRepository;
+import com.hisujung.microservice.repository.UnivActivityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,10 +27,10 @@ public class UnivActService {
     }
 
     //해당되는 교내 공지사항 조회
-    public UnivActListResponseDto findById(Member m, Long id) {
+    public UnivActListResponseDto findById(String memberId, Long id) {
         UnivActivity entity = univActivityRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 교내 공지사항을 찾을 수 없습니다."));
 
-        if (likeUnivActRepository.findByMemberAndAct(m, entity).isPresent()) {
+        if (likeUnivActRepository.findByMemberAndAct(memberId, entity).isPresent()) {
             return new UnivActListResponseDto(entity, 1); //회원이 좋아요 눌렀으면 1
         }
 
@@ -57,32 +55,26 @@ public class UnivActService {
     //============= 회원이 교내활동 좋아요 버튼 눌렀을 때 =============
 
    @Transactional
-    public Long saveLike(Long univActId, Member member) {
+    public Long saveLike(Long univActId, String memberId) {
         UnivActivity a = univActivityRepository.findById(univActId).orElseThrow();
-        LikeUnivActRequestDto dto = LikeUnivActRequestDto.builder()
-                .member(member)
+        return likeUnivActRepository.save(LikeUnivAct.builder()
+                .memberId(memberId)
                 .univActivity(a)
-                .build();
-        return likeUnivActRepository.save(dto.toEntity()).getId();
+                .build()).getId();
     }
 
     @Transactional
     //교내 공지사항 좋아요 취소
-    public void deleteLike(Member m, Long id) {
+    public void deleteLike(String memberId, Long id) {
         UnivActivity u = univActivityRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 교내 공지사항이 없습니다."));
-        LikeUnivAct likeUnivAct = likeUnivActRepository.findByMemberAndAct(m, u).orElseThrow(() -> new IllegalArgumentException(("해당 좋아요 항목이 없습니다.")));
+        LikeUnivAct likeUnivAct = likeUnivActRepository.findByMemberAndAct(memberId, u).orElseThrow(() -> new IllegalArgumentException(("해당 좋아요 항목이 없습니다.")));
         likeUnivActRepository.delete(likeUnivAct);
     }
 
 
-    //공지사항 id와 회원id를 통해 좋아요 항목 찾음
-//    public LikeUnivAct findByUserAndActId(Member member, Long UnivActId) {
-//
-//    }
-
     //회원의 교내 공지사항 좋아요 목록 조회
-    public List<UnivActListResponseDto> findByUser(Member member) {
-        List<LikeUnivAct> likeList = likeUnivActRepository.findByMember(member);
+    public List<UnivActListResponseDto> findByUser(String memberId) {
+        List<LikeUnivAct> likeList = likeUnivActRepository.findByMemberId(memberId);
         List<UnivActListResponseDto> resultList = new ArrayList<>();
         for(LikeUnivAct a: likeList) {
             UnivActivity u = a.getUnivActivity();
