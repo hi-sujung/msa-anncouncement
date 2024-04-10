@@ -45,8 +45,8 @@ public class UnivActivityApiController {
 
     //========회원이 교내 공지사항 좋아요 눌렀을 때========
     @PostMapping("/like")
-    public Long saveLike(Authentication auth, @RequestParam Long actId) {
-        String memberId = auth.getName();
+    public Long saveLike(@RequestParam Long actId, @RequestParam String memberId) {
+        //String memberId = auth.getName();
         return univActService.saveLike(actId, memberId);
     }
 

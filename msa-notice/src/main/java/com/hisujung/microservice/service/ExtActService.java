@@ -3,8 +3,10 @@ package com.hisujung.microservice.service;
 import com.hisujung.microservice.dto.ExtActListResponseDto;
 import com.hisujung.microservice.entity.ExternalAct;
 import com.hisujung.microservice.entity.LikeExternalAct;
+import com.hisujung.microservice.entity.ParticipateEx;
 import com.hisujung.microservice.repository.ExternalActRepository;
 import com.hisujung.microservice.repository.LikeExternalActRepository;
+import com.hisujung.microservice.repository.ParticipateExRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ public class ExtActService {
 
     private final ExternalActRepository externalActRepository;
     private final LikeExternalActRepository likeExternalActRepository;
+    private final ParticipateExRepository participateExRepository;
 
     //전체 대외활동 조회
     public List<ExtActListResponseDto> findAllByDesc() {
@@ -29,6 +32,13 @@ public class ExtActService {
     //제목 키워드별 대외활동 조회
     public List<ExtActListResponseDto> findByTitle(String keyword) {
         return externalActRepository.findByTitleContaining(keyword).stream().map(ExtActListResponseDto::new).collect(Collectors.toList());
+    }
+
+    //========= 대외활동 참여 ========
+    @Transactional
+    public Long saveCheck(String memberId, Long actId) {
+        ExternalAct e = externalActRepository.findById(actId).orElseThrow();
+        return participateExRepository.save(ParticipateEx.builder().memberId(memberId).activity(e).build()).getId();
     }
 
     //========= 대외활동 좋아요 ========
