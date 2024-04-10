@@ -26,7 +26,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
 	// Spring Security 추가
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+	//implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// JWT Token
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.2'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.2'
+
+	// rabbitMQ
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
