@@ -15,5 +15,5 @@ public interface ParticipateUnivRepository extends JpaRepository<ParticipateUniv
     List<ParticipateUniv> findByMemberId(String memberId);
 
     @Query("SELECT p FROM ParticipateUniv p WHERE p.memberId = :memberId AND p.univActivity = :activity")
-    Optional<ParticipateEx> findByMemberAndUnivAct(@Param("memberId") String memberId, @Param("activity") UnivActivity activity);
+    Optional<ParticipateUniv> findByMemberAndUnivAct(@Param("memberId") String memberId, @Param("activity") UnivActivity activity);
 }

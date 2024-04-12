@@ -19,32 +19,40 @@ public class ExternalAct extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
+    @Column(nullable = false)
+    private String title; //제목
 
-    private String info;
-
-    private String link;
-
-    @Column(columnDefinition = "TEXT")
-    private String content;
+    @Column(nullable = false, length = 50)
+    private String category; //카테고리
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    private LocalDateTime startDate;
+    //@Column(nullable = false)
+    private LocalDateTime startingDate; //시작일
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    private LocalDateTime deadline;
+    //@Column(nullable = false)
+    private LocalDateTime deadline; //마감일
+
+    @Column(nullable = true)
+    private String host; //주최
+
+    @Column(nullable = false, length = 2000)
+    private String content; //내용
+
+    private String link; //링크
     
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL)
     private List<LikeExternalAct> likeList;
 
     @Builder
-    public ExternalAct(String title, String info, String link, LocalDateTime startDate, LocalDateTime deadline, String content) {
+    public ExternalAct(String title, String category, String link, LocalDateTime startingDate, LocalDateTime deadline, String content, String host) {
         this.title = title;
-        this.info = info;
+        this.category = category;
         this.link = link;
-        this.startDate = startDate;
+        this.startingDate = startingDate;
         this.deadline = deadline;
         this.content = content;
+        this.host = host;
 
     }
 

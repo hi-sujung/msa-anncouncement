@@ -19,31 +19,35 @@ public class UnivActivity extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
 
-    private String postDepartment;
+    @Column(nullable = false, length = 50)
+    private String department;
 
-    @Column(length = 3000)
-    private String description;
-
-    //올라온 날짜
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    private LocalDateTime startDate;
+    @Column(nullable = false, length = 2000)
+    private String content;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    private LocalDateTime deadline;
+    //@Column(nullable = false)
+    private LocalDateTime startingDate; //시작일
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+    //@Column(nullable = false)
+    private LocalDateTime deadline; //마감일
+
+    @Column(nullable = false)
     private String link;
 
     @OneToMany(mappedBy = "univActivity", cascade = CascadeType.ALL)
     private List<LikeUnivAct> likeList = new ArrayList<>();
 
-
     @Builder
-    public UnivActivity(String title, String postDepartment, LocalDateTime startDate, LocalDateTime deadline, String link) {
+    public UnivActivity(String title, String department, String content, LocalDateTime startingDate, LocalDateTime deadline, String link) {
         this.title = title;
-        this.postDepartment = postDepartment;
-        this.startDate = startDate;
+        this.department = department;
+        this.content = content;
+        this.startingDate = startingDate;
         this.deadline = deadline;
         this.link = link;
     }

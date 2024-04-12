@@ -15,8 +15,6 @@ import java.util.List;
 public class UnivActivityApiController {
 
     private final UnivActService univActService;
-//    private final BasicMemberService basicMemberService;
-//    private final UserService userService;
 
     //전체 교내 공지사항 조회
     @GetMapping("/")
@@ -56,7 +54,7 @@ public class UnivActivityApiController {
     }
 
     //교내 공지사항 좋아요 취소
-    @DeleteMapping("/likecancel")
+    @DeleteMapping("/like-cancel")
     public Long deleteLike(@RequestParam Long id, @RequestParam String memberId) {
         //String memberId = auth.getName();
         univActService.deleteLike(memberId, id);
@@ -64,9 +62,27 @@ public class UnivActivityApiController {
     }
 
     //회원의 교내 공지사항 좋아요 목록
-    @GetMapping("/likelist")
+    @GetMapping("/like-list")
     public List<UnivActListResponseDto> findByUser(@RequestParam String memberId) {
         //String memberId = auth.getName();
         return univActService.findByUser(memberId);
+    }
+
+
+    //====== 대외활동 참여 체크 눌렀을 때 =======
+    @PostMapping("/check")
+    public Long saveCheck(String memberId, @RequestParam Long actId) {
+        return univActService.saveCheck(actId, memberId);
+    }
+
+    @DeleteMapping("/check-cancel")
+    public Long deleteCheck(String memberId, @RequestParam Long id) {
+        univActService.deleteCheck(memberId, id);
+        return id;
+    }
+
+    @GetMapping("/checked-list")
+    public List<UnivActListResponseDto> findCheckedByMember(String memberId) {
+        return univActService.findCheckedByUser(memberId);
     }
 }
