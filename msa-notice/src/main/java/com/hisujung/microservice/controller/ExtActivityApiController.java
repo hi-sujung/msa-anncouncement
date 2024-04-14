@@ -1,9 +1,12 @@
 package com.hisujung.microservice.controller;
 
+import com.hisujung.microservice.dto.ExtActCrawlingDto;
 import com.hisujung.microservice.dto.ExtActListResponseDto;
+import com.hisujung.microservice.dto.UnivActCrawlingDto;
 import com.hisujung.microservice.service.ExtActService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,5 +55,9 @@ public class ExtActivityApiController {
         return extActService.findLikedByUser(memberId);
     }
 
-
+    // 대외활동 크롤링 데이터 저장
+    @RabbitListener(queues = "external_act_queue")
+    public void ExtProcessMessage(ExtActCrawlingDto extActCrawlingDto) {
+        extActService.saveActivity(extActCrawlingDto);
+    }
 }
