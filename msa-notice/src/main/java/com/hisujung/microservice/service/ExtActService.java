@@ -1,6 +1,8 @@
 package com.hisujung.microservice.service;
 
+import com.hisujung.microservice.dto.ExtActCrawlingDto;
 import com.hisujung.microservice.dto.ExtActListResponseDto;
+import com.hisujung.microservice.dto.UnivActCrawlingDto;
 import com.hisujung.microservice.entity.ExternalAct;
 import com.hisujung.microservice.entity.LikeExternalAct;
 import com.hisujung.microservice.entity.ParticipateEx;
@@ -8,6 +10,7 @@ import com.hisujung.microservice.repository.ExternalActRepository;
 import com.hisujung.microservice.repository.LikeExternalActRepository;
 import com.hisujung.microservice.repository.ParticipateExRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -113,5 +116,8 @@ public class ExtActService {
         return resultList;
     }
 
-
+    @Transactional
+    public void saveActivity(ExtActCrawlingDto extActCrawlingDto) {
+        externalActRepository.save(extActCrawlingDto.toEntity());
+    }
 }
