@@ -1,9 +1,11 @@
 package com.hisujung.microservice.service;
 
+import com.hisujung.microservice.dto.ExtActListResponseDto;
+import com.hisujung.microservice.dto.UnivActCrawlingDto;
 import com.hisujung.microservice.dto.UnivActListResponseDto;
-import com.hisujung.microservice.entity.LikeUnivAct;
-import com.hisujung.microservice.entity.UnivActivity;
+import com.hisujung.microservice.entity.*;
 import com.hisujung.microservice.repository.LikeUnivActRepository;
+import com.hisujung.microservice.repository.ParticipateUnivRepository;
 import com.hisujung.microservice.repository.UnivActivityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ public class UnivActService {
 
     private final UnivActivityRepository univActivityRepository;
     private final LikeUnivActRepository likeUnivActRepository;
+    private final ParticipateUnivRepository participateUnivRepository;
 
     //모든 교내 공지사항 조회
     public List<UnivActListResponseDto> findAllByDesc() {
@@ -31,15 +34,21 @@ public class UnivActService {
         UnivActivity entity = univActivityRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 교내 공지사항을 찾을 수 없습니다."));
 
         if (likeUnivActRepository.findByMemberAndAct(memberId, entity).isPresent()) {
-            return new UnivActListResponseDto(entity, 1); //회원이 좋아요 눌렀으면 1
+            if (participateUnivRepository.findByMemberAndUnivAct(memberId, entity).isPresent()) {
+                return new UnivActListResponseDto(entity, 1, 1);
+            }
         }
-
-        return new UnivActListResponseDto(entity, 0); //회원이 좋아요 안 눌렀으면 0
+        else {
+            if (participateUnivRepository.findByMemberAndUnivAct(memberId, entity).isPresent()) {
+                return new UnivActListResponseDto(entity, 0, 1);
+            }
+        }
+        return new UnivActListResponseDto(entity, 0, 0); //회원이 좋아요 눌렀으면 1
     }
 
     //교내 공지사항 학과별로 조회
     public List<UnivActListResponseDto> findByDepartment(String department) {
-        return univActivityRepository.findByPostDepartmentContaining(department).stream().map(UnivActListResponseDto::new).collect(Collectors.toList());
+        return univActivityRepository.findByDepartmentContaining(department).stream().map(UnivActListResponseDto::new).collect(Collectors.toList());
     }
 
     //교내 공지사항 제목으로 조회
@@ -84,5 +93,41 @@ public class UnivActService {
     }
 
 
+    //========= 대외활동 참여 여부 체크 ===========
 
+    /**
+     * 대외활동 참여 여부 저장
+     * @param actId
+     * @param memberId
+     * @return
+     */
+    @Transactional
+    public Long saveCheck(Long actId, String memberId) {
+        UnivActivity e = univActivityRepository.findById(actId).orElseThrow();
+        return participateUnivRepository.save(ParticipateUniv.builder().memberId(memberId).univActivity(e).build()).getId();
+    }
+
+    @Transactional
+    //대외활동 좋아요 취소
+    public void deleteCheck(String memberId, Long id) {
+        UnivActivity e = univActivityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("해당 대외활동 정보를 조회할 수 없습니다."));
+        ParticipateUniv participateUniv = participateUnivRepository.findByMemberAndUnivAct(memberId,e).orElseThrow(() -> new IllegalArgumentException(("해당 참여 체크 항목이 없습니다.")));
+        participateUnivRepository.delete(participateUniv);
+    }
+
+    //회원의 참여 체크한 대외활동 목록 조회
+    public List<UnivActListResponseDto> findCheckedByUser(String memberId) {
+        List<ParticipateUniv> likeList = participateUnivRepository.findByMemberId(memberId);
+        List<UnivActListResponseDto> resultList = new ArrayList<>();
+        for(ParticipateUniv a: likeList) {
+            UnivActivity e = a.getUnivActivity();
+            resultList.add(new UnivActListResponseDto(e));
+        }
+        return resultList;
+    }
+
+    @Transactional
+    public void saveActivity(UnivActCrawlingDto univActCrawlingDto) {
+        univActivityRepository.save(univActCrawlingDto.toEntity());
+    }
 }

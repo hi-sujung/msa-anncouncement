@@ -9,37 +9,40 @@ import java.time.LocalDateTime;
 @Getter
 public class ExtActListResponseDto {
 
-    private Long id;
-    private String title;
-    private String info;
-    private String link;
-    private String content;
+    Long id;
+    String title;
+    String category;
+    String link;
+    LocalDateTime startingDate;
+    LocalDateTime deadline;
+    String content;
+    String host;
+
     int isLiked;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    private LocalDateTime startDate;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    private LocalDateTime deadline;
+    int participated;
 
     public ExtActListResponseDto(ExternalAct entity) {
         this.id = entity.getId();
         this.title = entity.getTitle();
-        this.info = entity.getInfo();
+        this.category = entity.getCategory();
         this.link = entity.getLink();
         this.content = entity.getContent();
-        this.startDate = entity.getStartDate();
+        this.startingDate = entity.getStartingDate();
         this.deadline = entity.getDeadline();
+        this.host = entity.getHost();
     }
 
-    public ExtActListResponseDto(ExternalAct entity, int isLiked) {
+    public ExtActListResponseDto(ExternalAct entity, int isLiked, int participated) {
         this.id = entity.getId();
         this.title = entity.getTitle();
-        this.info = entity.getInfo();
+        this.category = entity.getCategory();
         this.link = entity.getLink();
         this.content = entity.getContent();
-        this.startDate = entity.getStartDate();
+        this.startingDate = entity.getStartingDate();
         this.deadline = entity.getDeadline();
+        this.host = entity.getHost();
         this.isLiked = isLiked;
+
+        this.participated = participated;
     }
 }

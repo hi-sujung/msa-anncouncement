@@ -1,10 +1,11 @@
 package com.hisujung.microservice.controller;
 
+import com.hisujung.microservice.dto.UnivActCrawlingDto;
 import com.hisujung.microservice.dto.UnivActListResponseDto;
 import com.hisujung.microservice.service.UnivActService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,8 +17,6 @@ import java.util.List;
 public class UnivActivityApiController {
 
     private final UnivActService univActService;
-//    private final BasicMemberService basicMemberService;
-//    private final UserService userService;
 
     //전체 교내 공지사항 조회
     @GetMapping("/")
@@ -45,30 +44,53 @@ public class UnivActivityApiController {
 
     //========회원이 교내 공지사항 좋아요 눌렀을 때========
     @PostMapping("/like")
-    public Long saveLike(Authentication auth, @RequestParam Long actId) {
-        String memberId = auth.getName();
+    public Long saveLike(@RequestParam Long actId, @RequestParam String memberId) {
+        //String memberId = auth.getName();
         return univActService.saveLike(actId, memberId);
     }
 
     //교내 공지사항 상세페이지 조회
     @GetMapping("/id")
-    public UnivActListResponseDto findById(Authentication auth, @RequestParam Long actId) {
-        String memberId = auth.getName();
+    public UnivActListResponseDto findById(@RequestParam Long actId, @RequestParam String memberId) {
         return univActService.findById(memberId, actId);
     }
 
     //교내 공지사항 좋아요 취소
-    @DeleteMapping("/likecancel")
-    public Long deleteLike(@RequestParam Long id, Authentication auth) {
-        String memberId = auth.getName();
+    @DeleteMapping("/like-cancel")
+    public Long deleteLike(@RequestParam Long id, @RequestParam String memberId) {
+        //String memberId = auth.getName();
         univActService.deleteLike(memberId, id);
         return id;
     }
 
     //회원의 교내 공지사항 좋아요 목록
-    @GetMapping("/likelist")
-    public List<UnivActListResponseDto> findByUser(Authentication auth) {
-        String memberId = auth.getName();
+    @GetMapping("/like-list")
+    public List<UnivActListResponseDto> findByUser(@RequestParam String memberId) {
+        //String memberId = auth.getName();
         return univActService.findByUser(memberId);
+    }
+
+
+    //====== 대외활동 참여 체크 눌렀을 때 =======
+    @PostMapping("/check")
+    public Long saveCheck(String memberId, @RequestParam Long actId) {
+        return univActService.saveCheck(actId, memberId);
+    }
+
+    @DeleteMapping("/check-cancel")
+    public Long deleteCheck(String memberId, @RequestParam Long id) {
+        univActService.deleteCheck(memberId, id);
+        return id;
+    }
+
+    @GetMapping("/checked-list")
+    public List<UnivActListResponseDto> findCheckedByMember(String memberId) {
+        return univActService.findCheckedByUser(memberId);
+    }
+
+    //교내 공지사항 크롤링 데이터 저장
+    @RabbitListener(queues = "univ_activity_queue")
+    public void univProcessMessage(UnivActCrawlingDto univActCrawlingDto) {
+        univActService.saveActivity(univActCrawlingDto);
     }
 }

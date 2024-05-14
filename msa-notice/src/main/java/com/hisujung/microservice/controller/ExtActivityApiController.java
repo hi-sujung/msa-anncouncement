@@ -1,10 +1,12 @@
 package com.hisujung.microservice.controller;
 
+import com.hisujung.microservice.dto.ExtActCrawlingDto;
 import com.hisujung.microservice.dto.ExtActListResponseDto;
+import com.hisujung.microservice.dto.UnivActCrawlingDto;
 import com.hisujung.microservice.service.ExtActService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,30 +32,32 @@ public class ExtActivityApiController {
     }
 
     @GetMapping("/id")
-    public ExtActListResponseDto findById(Authentication auth, @RequestParam Long id) {
-        String memberId = auth.getName();
+    public ExtActListResponseDto findById(String memberId, @RequestParam Long id) {
         return extActService.findById(memberId, id);
     }
 
     //====== 대외활동 좋아요 눌렀을 때 =======
     @PostMapping("like")
-    public Long saveLike(Authentication auth, @RequestParam Long actId) {
-        String memberId = auth.getName();
+    public Long saveLike(String memberId, @RequestParam Long actId) {
         return extActService.saveLike(memberId, actId);
     }
 
     //대외활동 좋아요 삭제
-    @DeleteMapping("/likecancel")
-    public Long deleteLike(Authentication auth, @RequestParam Long id) {
-        String memberId = auth.getName();
+    @DeleteMapping("/like-cancel")
+    public Long deleteLike(String memberId, @RequestParam Long id) {
         extActService.deleteLike(memberId, id);
         return id;
     }
 
     //회원의 대외활동 좋아요 리스트 조회
-    @GetMapping("/likelist")
-    public List<ExtActListResponseDto> findByMember(Authentication auth) {
-        String memberId = auth.getName();
-        return extActService.findByUser(memberId);
+    @GetMapping("/like-list")
+    public List<ExtActListResponseDto> findByMember(String memberId) {
+        return extActService.findLikedByUser(memberId);
+    }
+
+    // 대외활동 크롤링 데이터 저장
+    @RabbitListener(queues = "external_act_queue")
+    public void ExtProcessMessage(ExtActCrawlingDto extActCrawlingDto) {
+        extActService.saveActivity(extActCrawlingDto);
     }
 }

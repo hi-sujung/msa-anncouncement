@@ -1,11 +1,16 @@
 package com.hisujung.microservice.service;
 
+import com.hisujung.microservice.dto.ExtActCrawlingDto;
 import com.hisujung.microservice.dto.ExtActListResponseDto;
+import com.hisujung.microservice.dto.UnivActCrawlingDto;
 import com.hisujung.microservice.entity.ExternalAct;
 import com.hisujung.microservice.entity.LikeExternalAct;
+import com.hisujung.microservice.entity.ParticipateEx;
 import com.hisujung.microservice.repository.ExternalActRepository;
 import com.hisujung.microservice.repository.LikeExternalActRepository;
+import com.hisujung.microservice.repository.ParticipateExRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +25,7 @@ public class ExtActService {
 
     private final ExternalActRepository externalActRepository;
     private final LikeExternalActRepository likeExternalActRepository;
+    private final ParticipateExRepository participateExRepository;
 
     //전체 대외활동 조회
     public List<ExtActListResponseDto> findAllByDesc() {
@@ -48,7 +54,7 @@ public class ExtActService {
     }
 
     //회원의 대외활동 좋아요 목록 조회
-    public List<ExtActListResponseDto> findByUser(String memberId) {
+    public List<ExtActListResponseDto> findLikedByUser(String memberId) {
         List<LikeExternalAct> likeList = likeExternalActRepository.findByMemberId(memberId);
         List<ExtActListResponseDto> resultList = new ArrayList<>();
         for(LikeExternalAct a: likeList) {
@@ -62,8 +68,56 @@ public class ExtActService {
         ExternalAct e = externalActRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 대외활동 정보가 존재하지 않습니다."));
 
         if (likeExternalActRepository.findByMemberAndAct(memberId, e).isPresent()) {
-            return new ExtActListResponseDto(e, 1); // 회원이 좋아요 눌렀으면 1 보냄
+            if (participateExRepository.findByMemberAndExtAct(memberId, e).isPresent()) {
+                return new ExtActListResponseDto(e, 1, 1); // 회원이 좋아요/참여 체크 눌렀으면 1 보냄, 안 눌렀으면 0
+            }
+            return new ExtActListResponseDto(e, 1, 0);
         }
-        return new ExtActListResponseDto(e, 0); // 회원이 좋아요 안 눌렀으면 0 보냄
+
+        else {
+            if (participateExRepository.findByMemberAndExtAct(memberId, e).isPresent()) {
+                return new ExtActListResponseDto(e, 0, 1); // 회원이 좋아요/참여 체크 눌렀으면 1 보냄, 안 눌렀으면 0
+            }
+            return new ExtActListResponseDto(e, 0, 0);
+
+        }
+    }
+
+    //========= 대외활동 참여 여부 체크 ===========
+
+    /**
+     * 대외활동 참여 여부 저장
+     * @param actId
+     * @param memberId
+     * @return
+     */
+    @Transactional
+    public Long saveCheck(Long actId, String memberId) {
+        ExternalAct e = externalActRepository.findById(actId).orElseThrow();
+        return participateExRepository.save(ParticipateEx.builder().memberId(memberId).activity(e).build()).getId();
+    }
+
+    @Transactional
+    //대외활동 좋아요 취소
+    public void deleteCheck(String memberId, Long id) {
+        ExternalAct e = externalActRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("해당 대외활동 정보를 조회할 수 없습니다."));
+        ParticipateEx participateEx = participateExRepository.findByMemberAndExtAct(memberId,e).orElseThrow(() -> new IllegalArgumentException(("해당 참여 체크 항목이 없습니다.")));
+        participateExRepository.delete(participateEx);
+    }
+
+    //회원의 참여 체크한 대외활동 목록 조회
+    public List<ExtActListResponseDto> findCheckedByUser(String memberId) {
+        List<ParticipateEx> likeList = participateExRepository.findByMemberId(memberId);
+        List<ExtActListResponseDto> resultList = new ArrayList<>();
+        for(ParticipateEx a: likeList) {
+            ExternalAct e = a.getActivity();
+            resultList.add(new ExtActListResponseDto(e));
+        }
+        return resultList;
+    }
+
+    @Transactional
+    public void saveActivity(ExtActCrawlingDto extActCrawlingDto) {
+        externalActRepository.save(extActCrawlingDto.toEntity());
     }
 }
