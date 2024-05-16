@@ -1,23 +1,24 @@
 package com.hisujung.microservice.service;
 
-import com.hisujung.microservice.dto.ExtActCrawlingDto;
-import com.hisujung.microservice.dto.ExtActListResponseDto;
-import com.hisujung.microservice.dto.UnivActCrawlingDto;
+import com.hisujung.microservice.dto.*;
 import com.hisujung.microservice.entity.ExternalAct;
 import com.hisujung.microservice.entity.LikeExternalAct;
 import com.hisujung.microservice.entity.ParticipateEx;
+import com.hisujung.microservice.entity.UnivActivity;
 import com.hisujung.microservice.repository.ExternalActRepository;
 import com.hisujung.microservice.repository.LikeExternalActRepository;
 import com.hisujung.microservice.repository.ParticipateExRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Log4j2
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
@@ -116,8 +117,30 @@ public class ExtActService {
         return resultList;
     }
 
+    //교외 공지사항 크롤링 데이터 저장
     @Transactional
     public void saveActivity(ExtActCrawlingDto extActCrawlingDto) {
         externalActRepository.save(extActCrawlingDto.toEntity());
+    }
+
+    //추천 교외 공지사항 조회
+    public List<ExtRecommendDto> getRecommendExternalAct(Long id) {
+        // 교내 상세 공지사항의 department(학과)와 데드라인으로 데이터 필터링
+        List<ExternalAct> filteredActivities = externalActRepository.findExternalActWithOrdering(id);
+
+        // 추천시스템 ms에 필터링한 데이터를 보낸다.
+        return List.of(sendActToRecommend(filteredActivities));
+    }
+
+    private ExtRecommendDto[] sendActToRecommend(List<ExternalAct> filteredActivities) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "http://localhost:8081/recommend/external"; // 변경사항
+
+        List<ExtRecommendDto> activities = new ArrayList<>();
+        for (int i = 0; i < filteredActivities.size(); i++) {
+            activities.add(new ExtRecommendDto(filteredActivities.get(i).getId(), filteredActivities.get(i).getTitle()));
+        }
+
+        return restTemplate.postForObject(url, activities, ExtRecommendDto[].class);
     }
 }
