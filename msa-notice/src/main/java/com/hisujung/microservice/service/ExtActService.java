@@ -136,11 +136,6 @@ public class ExtActService {
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://localhost:8081/recommend/external"; // 변경사항
 
-        List<ExtRecommendDto> activities = new ArrayList<>();
-        for (int i = 0; i < filteredActivities.size(); i++) {
-            activities.add(new ExtRecommendDto(filteredActivities.get(i).getId(), filteredActivities.get(i).getTitle()));
-        }
-
-        return restTemplate.postForObject(url, activities, ExtRecommendDto[].class);
+        return restTemplate.postForObject(url, ExtRecommendDto.toDtoList(filteredActivities), ExtRecommendDto[].class);
     }
 }

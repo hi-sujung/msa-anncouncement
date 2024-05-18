@@ -146,12 +146,6 @@ public class UnivActService {
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://localhost:8081/recommend/univ"; // 변경사항
 
-        List<UnivRecommendDto> activities = new ArrayList<>();
-        for (int i = 0; i < filteredActivities.size(); i++) {
-            activities.add(new UnivRecommendDto(filteredActivities.get(i).getId(), filteredActivities.get(i).getTitle()));
-        }
-
-        return restTemplate.postForObject(url, activities, UnivRecommendDto[].class);
+        return restTemplate.postForObject(url, UnivRecommendDto.toDtoList(filteredActivities), UnivRecommendDto[].class);
     }
-
 }
