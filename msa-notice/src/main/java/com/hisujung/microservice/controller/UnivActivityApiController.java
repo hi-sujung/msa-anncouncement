@@ -1,9 +1,11 @@
 package com.hisujung.microservice.controller;
 
+import com.hisujung.microservice.dto.UnivActCrawlingDto;
 import com.hisujung.microservice.dto.UnivActListResponseDto;
 import com.hisujung.microservice.service.UnivActService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -84,5 +86,11 @@ public class UnivActivityApiController {
     @GetMapping("/checked-list")
     public List<UnivActListResponseDto> findCheckedByMember(String memberId) {
         return univActService.findCheckedByUser(memberId);
+    }
+
+    //교내 공지사항 크롤링 데이터 저장
+    @RabbitListener(queues = "univ_activity_queue")
+    public void univProcessMessage(UnivActCrawlingDto univActCrawlingDto) {
+        univActService.saveActivity(univActCrawlingDto);
     }
 }

@@ -1,6 +1,7 @@
 package com.hisujung.microservice.service;
 
 import com.hisujung.microservice.dto.ExtActListResponseDto;
+import com.hisujung.microservice.dto.UnivActCrawlingDto;
 import com.hisujung.microservice.dto.UnivActListResponseDto;
 import com.hisujung.microservice.entity.*;
 import com.hisujung.microservice.repository.LikeUnivActRepository;
@@ -125,4 +126,8 @@ public class UnivActService {
         return resultList;
     }
 
+    @Transactional
+    public void saveActivity(UnivActCrawlingDto univActCrawlingDto) {
+        univActivityRepository.save(univActCrawlingDto.toEntity());
+    }
 }
