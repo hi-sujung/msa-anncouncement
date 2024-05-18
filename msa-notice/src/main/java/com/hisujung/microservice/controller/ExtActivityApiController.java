@@ -3,6 +3,7 @@ package com.hisujung.microservice.controller;
 import com.hisujung.microservice.dto.ExtActCrawlingDto;
 import com.hisujung.microservice.dto.ExtActListResponseDto;
 import com.hisujung.microservice.dto.UnivActCrawlingDto;
+import com.hisujung.microservice.dto.UnivActListResponseDto;
 import com.hisujung.microservice.service.ExtActService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +19,6 @@ import java.util.List;
 public class ExtActivityApiController {
 
     private final ExtActService extActService;
-//    private final BasicMemberService basicMemberService;
-//    private final UserService userService;
 
     @GetMapping("/")
     public List<ExtActListResponseDto> findAll() {
@@ -59,5 +58,22 @@ public class ExtActivityApiController {
     @RabbitListener(queues = "external_act_queue")
     public void ExtProcessMessage(ExtActCrawlingDto extActCrawlingDto) {
         extActService.saveActivity(extActCrawlingDto);
+    }
+
+    //====== 대외활동 참여 체크 눌렀을 때 =======
+    @PostMapping("/check")
+    public Long saveCheck(String memberId, @RequestParam Long actId) {
+        return extActService.saveCheck(actId, memberId);
+    }
+
+    @DeleteMapping("/check-cancel")
+    public Long deleteCheck(String memberId, @RequestParam Long id) {
+        extActService.deleteCheck(memberId, id);
+        return id;
+    }
+
+    @GetMapping("/checked-list")
+    public List<ExtActListResponseDto> findCheckedByMember(String memberId) {
+        return extActService.findCheckedByUser(memberId);
     }
 }
