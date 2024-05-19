@@ -4,12 +4,15 @@ import com.hisujung.microservice.dto.*;
 import com.hisujung.microservice.entity.ExternalAct;
 import com.hisujung.microservice.entity.LikeExternalAct;
 import com.hisujung.microservice.entity.ParticipateEx;
-import com.hisujung.microservice.entity.UnivActivity;
 import com.hisujung.microservice.repository.ExternalActRepository;
 import com.hisujung.microservice.repository.LikeExternalActRepository;
 import com.hisujung.microservice.repository.ParticipateExRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -22,11 +25,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
+@Configuration
 public class ExtActService {
 
     private final ExternalActRepository externalActRepository;
     private final LikeExternalActRepository likeExternalActRepository;
     private final ParticipateExRepository participateExRepository;
+
+    @Value("${external.recommendation.url}")
+    private String ExtRecommendationUrl;
 
     //전체 대외활동 조회
     public List<ExtActListResponseDto> findAllByDesc() {
@@ -134,8 +141,6 @@ public class ExtActService {
 
     private ExtRecommendDto[] sendActToRecommend(List<ExternalAct> filteredActivities) {
         RestTemplate restTemplate = new RestTemplate();
-        String url = "http://localhost:8081/recommend/external"; // 변경사항
-
-        return restTemplate.postForObject(url, ExtRecommendDto.toDtoList(filteredActivities), ExtRecommendDto[].class);
+        return restTemplate.postForObject(ExtRecommendationUrl, ExtRecommendDto.toDtoList(filteredActivities), ExtRecommendDto[].class);
     }
 }
