@@ -7,6 +7,9 @@ import com.hisujung.microservice.repository.ParticipateUnivRepository;
 import com.hisujung.microservice.repository.UnivActivityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -19,11 +22,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
+@Configuration
 public class UnivActService {
 
     private final UnivActivityRepository univActivityRepository;
     private final LikeUnivActRepository likeUnivActRepository;
     private final ParticipateUnivRepository participateUnivRepository;
+
+    @Value("${univ.recommendation.url}")
+    private String univRecommendationUrl;
 
     //모든 교내 공지사항 조회
     public List<UnivActListResponseDto> findAllByDesc() {
@@ -144,8 +151,6 @@ public class UnivActService {
     // 추천시스템 ms에 필터링된 데이터를 보내고 응답을 받는 메서드
     private UnivRecommendDto[] sendActToRecommend(List<UnivActivity> filteredActivities) {
         RestTemplate restTemplate = new RestTemplate();
-        String url = "http://localhost:8081/recommend/univ"; // 변경사항
-
-        return restTemplate.postForObject(url, UnivRecommendDto.toDtoList(filteredActivities), UnivRecommendDto[].class);
+        return restTemplate.postForObject(univRecommendationUrl, UnivRecommendDto.toDtoList(filteredActivities), UnivRecommendDto[].class);
     }
 }
