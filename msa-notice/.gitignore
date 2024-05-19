@@ -40,3 +40,5 @@ out/
 .vscode/
 
 application.properties
+.docker
+src/main/resources/.env
