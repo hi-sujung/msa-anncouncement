@@ -34,11 +34,9 @@ out/
 /.nb-gradle/
 
 /H2/**
-/src/main/resources/
 
 ### VS Code ###
 .vscode/
 
-application.properties
 .docker
-src/main/resources/.env
+.env
