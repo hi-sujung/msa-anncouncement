@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class AutoPortfolioDto {
+public class PortfolioSaveRequestDto {
+    String title;
     String contents;
 }
