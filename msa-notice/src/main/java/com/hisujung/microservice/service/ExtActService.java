@@ -1,8 +1,6 @@
 package com.hisujung.microservice.service;
 
-import com.hisujung.microservice.dto.ExtActCrawlingDto;
-import com.hisujung.microservice.dto.ExtActListResponseDto;
-import com.hisujung.microservice.dto.UnivActCrawlingDto;
+import com.hisujung.microservice.dto.*;
 import com.hisujung.microservice.entity.ExternalAct;
 import com.hisujung.microservice.entity.LikeExternalAct;
 import com.hisujung.microservice.entity.ParticipateEx;
@@ -10,22 +8,32 @@ import com.hisujung.microservice.repository.ExternalActRepository;
 import com.hisujung.microservice.repository.LikeExternalActRepository;
 import com.hisujung.microservice.repository.ParticipateExRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Log4j2
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
+@Configuration
 public class ExtActService {
 
     private final ExternalActRepository externalActRepository;
     private final LikeExternalActRepository likeExternalActRepository;
     private final ParticipateExRepository participateExRepository;
+
+    @Value("${external.recommendation.url}")
+    private String ExtRecommendationUrl;
 
     //전체 대외활동 조회
     public List<ExtActListResponseDto> findAllByDesc() {
@@ -116,8 +124,23 @@ public class ExtActService {
         return resultList;
     }
 
+    //교외 공지사항 크롤링 데이터 저장
     @Transactional
     public void saveActivity(ExtActCrawlingDto extActCrawlingDto) {
         externalActRepository.save(extActCrawlingDto.toEntity());
+    }
+
+    //추천 교외 공지사항 조회
+    public List<ExtRecommendDto> getRecommendExternalAct(Long id) {
+        // 교내 상세 공지사항의 department(학과)와 데드라인으로 데이터 필터링
+        List<ExternalAct> filteredActivities = externalActRepository.findExternalActWithOrdering(id);
+
+        // 추천시스템 ms에 필터링한 데이터를 보낸다.
+        return List.of(sendActToRecommend(filteredActivities));
+    }
+
+    private ExtRecommendDto[] sendActToRecommend(List<ExternalAct> filteredActivities) {
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.postForObject(ExtRecommendationUrl, ExtRecommendDto.toDtoList(filteredActivities), ExtRecommendDto[].class);
     }
 }

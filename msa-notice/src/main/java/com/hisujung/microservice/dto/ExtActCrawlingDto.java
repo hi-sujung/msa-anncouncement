@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -20,11 +21,9 @@ public class ExtActCrawlingDto {
 
     String category; //카테고리
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    LocalDateTime startingDate; //시작일
+    String startingDate; //시작일
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    LocalDateTime deadline; //마감일
+    String deadline; //마감일
 
     String host; //주최
 
@@ -33,13 +32,23 @@ public class ExtActCrawlingDto {
     String link; //링크
 
     public ExternalAct toEntity() {
+
+        LocalDateTime startingDateTime = parseDate(startingDate);
+        LocalDateTime deadlineDateTime = parseDate(deadline);
+
         return ExternalAct.builder()
                 .title(title)
                 .category(category)
-                .startingDate(startingDate)
-                .deadline(deadline)
+                .startingDate(startingDateTime)
+                .deadline(deadlineDateTime)
                 .host(host)
                 .content(content)
                 .link(link).build();
+    }
+
+    private LocalDateTime parseDate(String dateStr) {
+        String formattedDateStr = dateStr.replace(".", "-") + " 00:00:00";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return LocalDateTime.parse(formattedDateStr, formatter);
     }
 }
