@@ -73,24 +73,24 @@ public class UnivActivityApiController {
 
     //====== 대외활동 참여 체크 눌렀을 때 =======
     @PostMapping("/check")
-    public Long saveCheck(String memberId, @RequestParam Long actId) {
+    public Long saveCheck(@RequestParam String memberId, @RequestParam Long actId) {
         return univActService.saveCheck(actId, memberId);
     }
 
     @DeleteMapping("/check-cancel")
-    public Long deleteCheck(String memberId, @RequestParam Long id) {
+    public Long deleteCheck(@RequestParam String memberId, @RequestParam Long id) {
         univActService.deleteCheck(memberId, id);
         return id;
     }
 
     @GetMapping("/checked-list")
-    public List<UnivActListResponseDto> findCheckedByMember(String memberId) {
+    public List<UnivActListResponseDto> findCheckedByMember(@RequestParam String memberId) {
         return univActService.findCheckedByUser(memberId);
     }
 
     //교내 공지사항 크롤링 데이터 저장
-    @RabbitListener(queues = "univ_activity_queue")
-    public void univProcessMessage(UnivActCrawlingDto univActCrawlingDto) {
-        univActService.saveActivity(univActCrawlingDto);
-    }
+//    @RabbitListener(queues = "univ_activity_queue")
+//    public void univProcessMessage(UnivActCrawlingDto univActCrawlingDto) {
+//        univActService.saveActivity(univActCrawlingDto);
+//    }
 }
