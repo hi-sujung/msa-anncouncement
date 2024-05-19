@@ -1,28 +1,36 @@
 package com.hisujung.microservice.service;
 
-import com.hisujung.microservice.dto.ExtActListResponseDto;
-import com.hisujung.microservice.dto.UnivActCrawlingDto;
-import com.hisujung.microservice.dto.UnivActListResponseDto;
+import com.hisujung.microservice.dto.*;
 import com.hisujung.microservice.entity.*;
 import com.hisujung.microservice.repository.LikeUnivActRepository;
 import com.hisujung.microservice.repository.ParticipateUnivRepository;
 import com.hisujung.microservice.repository.UnivActivityRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
+@Configuration
 public class UnivActService {
 
     private final UnivActivityRepository univActivityRepository;
     private final LikeUnivActRepository likeUnivActRepository;
     private final ParticipateUnivRepository participateUnivRepository;
+
+    @Value("${univ.recommendation.url}")
+    private String univRecommendationUrl;
 
     //모든 교내 공지사항 조회
     public List<UnivActListResponseDto> findAllByDesc() {
@@ -129,5 +137,20 @@ public class UnivActService {
     @Transactional
     public void saveActivity(UnivActCrawlingDto univActCrawlingDto) {
         univActivityRepository.save(univActCrawlingDto.toEntity());
+    }
+
+    //추천 교내 공지사항 조회
+    public List<UnivRecommendDto> getRecommendUnivAct(Long id) {
+        // 추천시스템 전송 데이터 필터링
+        List<UnivActivity> filteredActivities  = univActivityRepository.findUnivActWithOrdering(id);
+
+        // 추천시스템에 필터링한 데이터 전송 후 응답 받음
+        return List.of(sendActToRecommend(filteredActivities));
+    }
+
+    // 추천시스템 ms에 필터링된 데이터를 보내고 응답을 받는 메서드
+    private UnivRecommendDto[] sendActToRecommend(List<UnivActivity> filteredActivities) {
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.postForObject(univRecommendationUrl, UnivRecommendDto.toDtoList(filteredActivities), UnivRecommendDto[].class);
     }
 }
