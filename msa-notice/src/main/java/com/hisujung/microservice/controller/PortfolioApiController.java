@@ -3,15 +3,19 @@ package com.hisujung.microservice.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hisujung.microservice.ApiResponse;
 import com.hisujung.microservice.dto.ActivitiesDto;
-import com.hisujung.microservice.dto.AutoPortfolioDto;
+import com.hisujung.microservice.dto.PortfolioSaveRequestDto;
 import com.hisujung.microservice.dto.UnivActListResponseDto;
+import com.hisujung.microservice.service.ExtActService;
 import com.hisujung.microservice.service.GptServiceImpl;
 import com.hisujung.microservice.service.RateLimiterService;
+import com.hisujung.microservice.service.UnivActService;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +31,8 @@ public class PortfolioApiController {
 
     private final GptServiceImpl gptService;
     private final RateLimiterService rateLimiterService;
+    private final UnivActService univActService;
+    private final ExtActService extActService;
 
     public List<UnivActListResponseDto> fetchNoticeCheckedList(String memberId) {
         RestTemplate restTemplate = new RestTemplate();
@@ -42,17 +48,10 @@ public class PortfolioApiController {
         return response.getBody();
     }
 
-    //public
-
-    public String fetchNoticeCheckedList() {
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.getForEntity("http://localhost:8080/notice/univactivity/checked-list", String.class);
-        return response.getBody();
-    }
 
     // 처리율 제한 장치 적용하려는 API
     @PostMapping("/create-by-ai")
-    public ApiResponse<AutoPortfolioDto> createByAi(@RequestParam String memberId, @RequestParam String careerField) throws JsonProcessingException {
+    public ApiResponse<PortfolioSaveRequestDto> createByAi(@RequestParam String memberId, @RequestParam String careerField, @RequestParam String title) throws JsonProcessingException {
 
         //String memberId = auth.getName();
 
@@ -66,7 +65,7 @@ public class PortfolioApiController {
             log.info("Available Token : {}", saveToken);
 
             // 변경된 부분 시작
-            List<UnivActListResponseDto> noticeCheckedList = fetchNoticeCheckedList(memberId);
+            List<UnivActListResponseDto> noticeCheckedList = univActService.findCheckedByUser(memberId);
             //String titles = ""
             StringBuilder titles = new StringBuilder();
             for(UnivActListResponseDto dto: noticeCheckedList) {
@@ -74,15 +73,21 @@ public class PortfolioApiController {
                 titles.append(", ");
             }
 
-            AutoPortfolioDto result = new AutoPortfolioDto(gptService.getAssistantMsg(titles.toString(), careerField));
-             // 변경된 부분 끝
+            PortfolioSaveRequestDto result = new PortfolioSaveRequestDto(title, gptService.getAssistantMsg(titles.toString(), careerField));
 
-            //AutoPortfolioDto result = new AutoPortfolioDto(gptService.getAssistantMsg(dto.getActivities(), dto.getCareerField()));
+            // RestTemplate을 사용하여 포트폴리오 저장 API 호출
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+            HttpEntity<PortfolioSaveRequestDto> entity = new HttpEntity<>(result, headers);
 
-//            if(result == -1L) {
-//                return (ApiResponse<Long>) ApiResponse.createError("포트폴리오 생성에 실패했습니다.");
-//            }
+            String saveUrl = "http://localhost:8080/portfolio/new"; // 실제 URL로 변경해야 합니다.
+            ResponseEntity<ApiResponse> saveResponseEntity = restTemplate.exchange(saveUrl, HttpMethod.POST, entity, ApiResponse.class);
 
+            ApiResponse<Long> saveResponse = saveResponseEntity.getBody();
+            if (saveResponse == null) {
+                return (ApiResponse<PortfolioSaveRequestDto>) ApiResponse.createError("포트폴리오 업데이트에 실패했습니다.");
+            }
             return ApiResponse.createSuccess(result);
         }
 
@@ -92,7 +97,7 @@ public class PortfolioApiController {
         log.info("Available Token : {}", saveToken);
         log.info("Wait Time {} Second ", waitForRefill);
 
-        return (ApiResponse<AutoPortfolioDto>) ApiResponse.createError("HttpStatus.TOO_MANY_REQUESTS");
+        return (ApiResponse<PortfolioSaveRequestDto>) ApiResponse.createError("HttpStatus.TOO_MANY_REQUESTS");
     }
 
 }
