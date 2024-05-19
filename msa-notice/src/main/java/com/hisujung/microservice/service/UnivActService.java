@@ -45,6 +45,7 @@ public class UnivActService {
             if (participateUnivRepository.findByMemberAndUnivAct(memberId, entity).isPresent()) {
                 return new UnivActListResponseDto(entity, 1, 1);
             }
+            return new UnivActListResponseDto(entity, 1, 0);
         }
         else {
             if (participateUnivRepository.findByMemberAndUnivAct(memberId, entity).isPresent()) {
@@ -69,7 +70,7 @@ public class UnivActService {
         return univActivityRepository.findByDepartmentAndTitle(department, keyword).stream().map(UnivActListResponseDto::new).collect(Collectors.toList());
     }
 
-    //============= 회원이 교내활동 좋아요 버튼 눌렀을 때 =============
+    // ============= 회원이 교내활동 좋아요 버튼 눌렀을 때 =============
 
    @Transactional
     public Long saveLike(Long univActId, String memberId) {
