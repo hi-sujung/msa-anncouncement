@@ -40,3 +40,8 @@ out/
 
 .docker
 .env
+.dockerignore
+docker-compose.yml
+msa-notice.yml
+msa-notice-secret.yml
+rabbitmq/

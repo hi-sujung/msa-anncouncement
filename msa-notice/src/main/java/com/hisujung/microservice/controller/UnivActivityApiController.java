@@ -89,8 +89,8 @@ public class UnivActivityApiController {
     }
 
     //교내 공지사항 크롤링 데이터 저장
-//    @RabbitListener(queues = "univ_activity_queue")
-//    public void univProcessMessage(UnivActCrawlingDto univActCrawlingDto) {
-//        univActService.saveActivity(univActCrawlingDto);
-//    }
+    @RabbitListener(queues = "univ_activity_queue")
+    public void univProcessMessage(UnivActCrawlingDto univActCrawlingDto) {
+        univActService.saveActivity(univActCrawlingDto);
+    }
 }

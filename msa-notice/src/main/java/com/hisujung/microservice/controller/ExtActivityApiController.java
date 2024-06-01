@@ -54,10 +54,10 @@ public class ExtActivityApiController {
     }
 
     // 대외활동 크롤링 데이터 저장
-//    @RabbitListener(queues = "external_act_queue")
-//    public void ExtProcessMessage(ExtActCrawlingDto extActCrawlingDto) {
-//        extActService.saveActivity(extActCrawlingDto);
-//    }
+    @RabbitListener(queues = "external_act_queue")
+    public void ExtProcessMessage(ExtActCrawlingDto extActCrawlingDto) {
+        extActService.saveActivity(extActCrawlingDto);
+    }
 
     //====== 대외활동 참여 체크 눌렀을 때 =======
     @PostMapping("/check")
