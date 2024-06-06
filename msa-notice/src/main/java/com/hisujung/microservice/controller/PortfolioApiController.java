@@ -35,7 +35,7 @@ public class PortfolioApiController {
     private final UnivActService univActService;
     private final ExtActService extActService;
     @Value("${portfolio.ms.url}")
-    private final String portfolioMsUrl;
+    private String portfolioMsUrl;
 //    @Value("spring-cloud-gateway.ms.url")
 //    private final String springCloudGatewayMs;
 
