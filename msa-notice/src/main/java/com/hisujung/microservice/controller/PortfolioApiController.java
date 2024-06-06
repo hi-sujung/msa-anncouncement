@@ -13,6 +13,7 @@ import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,11 +34,14 @@ public class PortfolioApiController {
     private final RateLimiterService rateLimiterService;
     private final UnivActService univActService;
     private final ExtActService extActService;
-
+    @Value("${portfolio.ms.url}")
+    private final String portfolioMsUrl;
+//    @Value("spring-cloud-gateway.ms.url")
+//    private final String springCloudGatewayMs;
 
     public List<UnivActListResponseDto> fetchNoticeCheckedList(String memberId) {
         RestTemplate restTemplate = new RestTemplate();
-        String url = "http://localhost:8080/notice/univactivity/checked-list?memberId=" + memberId;
+        String url = portfolioMsUrl+"notice/univactivity/checked-list?memberId=" + memberId;
 
         ResponseEntity<List<UnivActListResponseDto>> response = restTemplate.exchange(
                 url,
@@ -80,9 +84,11 @@ public class PortfolioApiController {
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
+            headers.set("X-Authoization-Id", memberId); // 헤더에 memberId 추가
+
             HttpEntity<PortfolioSaveRequestDto> entity = new HttpEntity<>(result, headers);
 
-            String saveUrl = "http://msa-portfolio/portfolio/new?memberId=" + memberId; // 실제 URL로 변경해야 합니다.
+            String saveUrl = portfolioMsUrl+ "portfolio/new?memberId=" + memberId; // 실제 URL로 변경해야 합니다.
             ResponseEntity<ApiResponse> saveResponseEntity = restTemplate.exchange(saveUrl, HttpMethod.POST, entity, ApiResponse.class);
 
             ApiResponse<Long> saveResponse = saveResponseEntity.getBody();
