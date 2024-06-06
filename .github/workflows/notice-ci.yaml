@@ -37,6 +37,7 @@ jobs:
           UNIV_RECOMMENDATION_URL: ${{ env.UNIV_RECOMMENDATION_URL }}
           EXTERNAL_RECOMMENDATION_URL: ${{ env.EXTERNAL_RECOMMENDATION_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PORTFOLIO_MS: ${{ env.PORTFOLIO_MS }}
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
