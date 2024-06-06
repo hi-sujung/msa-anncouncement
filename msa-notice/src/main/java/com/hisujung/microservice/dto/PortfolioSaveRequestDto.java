@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @Getter
 public class PortfolioSaveRequestDto {
     String title;
-    String contents;
+    String description;
 }
