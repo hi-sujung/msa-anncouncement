@@ -37,54 +37,54 @@ public class UnivActivityApiController {
     }
 
     //제목 및 학과별 교내 공지사항 조회
-    @GetMapping("/department/keyword")
+    @GetMapping(path= "/department/keyword")
     public List<UnivActListResponseDto> findByDepAndTitle(@RequestParam String department, @RequestParam String keyword) {
         return univActService.findByDepAndTitle(department, keyword);
     }
 
     //========회원이 교내 공지사항 좋아요 눌렀을 때========
-    @PostMapping("/like")
-    public Long saveLike(@RequestParam Long actId, @RequestParam String memberId) {
+    @PostMapping(path= "/like", headers = "X-Authoization-Id")
+    public Long saveLike(@RequestParam Long actId, @RequestHeader("X-Authoization-Id") String memberId) {
         //String memberId = auth.getName();
         return univActService.saveLike(actId, memberId);
     }
 
     //교내 공지사항 상세페이지 조회
-    @GetMapping("/id")
-    public UnivActListResponseDto findById(@RequestParam Long actId, @RequestParam String memberId) {
+    @GetMapping(path= "/id", headers = "X-Authoization-Id")
+    public UnivActListResponseDto findById(@RequestParam Long actId, @RequestHeader("X-Authoization-Id") String memberId) {
         return univActService.findById(memberId, actId);
     }
 
     //교내 공지사항 좋아요 취소
-    @DeleteMapping("/like-cancel")
-    public Long deleteLike(@RequestParam Long id, @RequestParam String memberId) {
+    @DeleteMapping(path= "/like-cancel", headers = "X-Authoization-Id")
+    public Long deleteLike(@RequestParam Long id, @RequestHeader("X-Authoization-Id") String memberId) {
         //String memberId = auth.getName();
         univActService.deleteLike(memberId, id);
         return id;
     }
 
     //회원의 교내 공지사항 좋아요 목록
-    @GetMapping("/like-list")
-    public List<UnivActListResponseDto> findByUser(@RequestParam String memberId) {
+    @GetMapping(path= "/like-list", headers = "X-Authoization-Id")
+    public List<UnivActListResponseDto> findByUser(@RequestHeader("X-Authoization-Id") String memberId) {
         //String memberId = auth.getName();
         return univActService.findByUser(memberId);
     }
 
 
     //====== 대외활동 참여 체크 눌렀을 때 =======
-    @PostMapping("/check")
-    public Long saveCheck(@RequestParam String memberId, @RequestParam Long actId) {
+    @PostMapping(path= "/check", headers = "X-Authoization-Id")
+    public Long saveCheck(@RequestHeader("X-Authoization-Id") String memberId, @RequestParam Long actId) {
         return univActService.saveCheck(actId, memberId);
     }
 
-    @DeleteMapping("/check-cancel")
-    public Long deleteCheck(@RequestParam String memberId, @RequestParam Long id) {
+    @DeleteMapping(path= "/check-cancel", headers = "X-Authoization-Id")
+    public Long deleteCheck(@RequestHeader("X-Authoization-Id") String memberId, @RequestParam Long id) {
         univActService.deleteCheck(memberId, id);
         return id;
     }
 
-    @GetMapping("/checked-list")
-    public List<UnivActListResponseDto> findCheckedByMember(@RequestParam String memberId) {
+    @GetMapping(path= "/checked-list", headers = "X-Authoization-Id")
+    public List<UnivActListResponseDto> findCheckedByMember(@RequestHeader("X-Authoization-Id") String memberId) {
         return univActService.findCheckedByUser(memberId);
     }
 

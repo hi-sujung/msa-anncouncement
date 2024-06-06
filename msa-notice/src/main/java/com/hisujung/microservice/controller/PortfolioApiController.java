@@ -34,6 +34,7 @@ public class PortfolioApiController {
     private final UnivActService univActService;
     private final ExtActService extActService;
 
+
     public List<UnivActListResponseDto> fetchNoticeCheckedList(String memberId) {
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://localhost:8080/notice/univactivity/checked-list?memberId=" + memberId;
@@ -50,8 +51,8 @@ public class PortfolioApiController {
 
 
     // 처리율 제한 장치 적용하려는 API
-    @PostMapping("/create-by-ai")
-    public ApiResponse<PortfolioSaveRequestDto> createByAi(@RequestParam String memberId, @RequestParam String careerField, @RequestParam String title) throws JsonProcessingException {
+    @PostMapping(path="/create-by-ai", headers = "X-Authoization-Id")
+    public ApiResponse<PortfolioSaveRequestDto> createByAi(@RequestHeader("X-Authoization-Id") String memberId, @RequestParam String careerField, @RequestParam String title) throws JsonProcessingException {
 
         //String memberId = auth.getName();
 
@@ -81,7 +82,7 @@ public class PortfolioApiController {
             headers.set("Content-Type", "application/json");
             HttpEntity<PortfolioSaveRequestDto> entity = new HttpEntity<>(result, headers);
 
-            String saveUrl = "http://localhost:8080/portfolio/new"; // 실제 URL로 변경해야 합니다.
+            String saveUrl = "http://msa-portfolio/portfolio/new?memberId=" + memberId; // 실제 URL로 변경해야 합니다.
             ResponseEntity<ApiResponse> saveResponseEntity = restTemplate.exchange(saveUrl, HttpMethod.POST, entity, ApiResponse.class);
 
             ApiResponse<Long> saveResponse = saveResponseEntity.getBody();
