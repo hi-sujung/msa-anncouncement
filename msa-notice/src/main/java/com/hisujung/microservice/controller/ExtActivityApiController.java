@@ -35,7 +35,7 @@ public class ExtActivityApiController {
 
 
     //====== 대외활동 좋아요 눌렀을 때 =======
-    @PostMapping(path = "like", headers = "X-Authoization-Id")
+    @PostMapping(path = "/like", headers = "X-Authoization-Id")
     public Long saveLike(@RequestHeader("X-Authoization-Id") String memberId, @RequestParam Long actId) {
         return extActService.saveLike(memberId, actId);
     }
