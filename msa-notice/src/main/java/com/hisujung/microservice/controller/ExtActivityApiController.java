@@ -37,7 +37,8 @@ public class ExtActivityApiController {
     //====== 대외활동 좋아요 눌렀을 때 =======
     @PostMapping(path = "/like", headers = "X-Authoization-Id")
     public Long saveLike(@RequestHeader("X-Authoization-Id") String memberId, @RequestParam Long actId) {
-        return extActService.saveLike(memberId, actId);
+        extActService.saveLike(memberId, actId);
+        return actId;
     }
 
     //대외활동 좋아요 삭제
@@ -62,7 +63,8 @@ public class ExtActivityApiController {
     //====== 대외활동 참여 체크 눌렀을 때 =======
     @PostMapping(path = "/check", headers = "X-Authoization-Id")
     public Long saveCheck(@RequestHeader("X-Authoization-Id") String memberId, @RequestParam Long actId) {
-        return extActService.saveCheck(actId, memberId);
+        extActService.saveCheck(actId, memberId);
+        return actId;
     }
 
     @DeleteMapping(path = "/check-cancel", headers = "X-Authoization-Id")
