@@ -1,90 +1,63 @@
-//package com.hisujung.microservice.config;
-//
-//import com.hisujung.microservice.jwt.JwtTokenFilter;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.config.Customizer;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-//import org.springframework.security.config.http.SessionCreationPolicy;
-//import org.springframework.security.web.SecurityFilterChain;
-//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-//
-//@Configuration
-//@RequiredArgsConstructor
-//@EnableWebSecurity
-//public class SecurityConfig {
-////    private final CustomUserDetailsService customUserDetailsService;
-////    private final JwtUtils jwtUtils;
-////    private final CustomAccessDeniedHandler accessDeniedHandler;
-////    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-//
-//    @Value("${jwt.secret}")
-//    private String secretKey;
-//
-////    @Autowired
-////    public SecurityConfig(@Lazy LoginService loginService) {
-////        this.userService = userService;
-////    }
-////
-//
-////    @Bean
-////    public PasswordEncoder passwordEncoder(){
-////        PasswordEncoder encoder = new BCryptPasswordEncoder();
-////        return encoder;
-////    }
-//
-////    @Bean
-////    public Storage storage() {
-////        return StorageOptions.getDefaultInstance().getService();
-////    }
-//
-////    @Bean
-////    public BCryptPasswordEncoder encoder() {
-////        return new BCryptPasswordEncoder();
-////    }
-//
-//    private static final String[] AUTH_WHITELIST = {
-//            "/notice/**",
-//    };
-//
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        //CSRF, CORS
-//        http.csrf((csrf) -> csrf.disable());
-//        http.cors(Customizer.withDefaults());
-//
-//        //세션 관리 상태 없음으로 구성, Spring Security가 세션 생성 or 사용 X
-//        http.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
-//                SessionCreationPolicy.STATELESS));
-//
-//        http.addFilterBefore(new JwtTokenFilter(secretKey), UsernamePasswordAuthenticationFilter.class);
-//
-//        //FormLogin, BasicHttp 비활성화
-//        http.formLogin((form) -> form.disable());
-//        http.httpBasic(AbstractHttpConfigurer::disable);
-//
-//
-////        //JwtAuthFilter를 UsernamePasswordAuthenticationFilter 앞에 추가
-////        http.addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtils), UsernamePasswordAuthenticationFilter.class);
-////
-////        http.exceptionHandling((exceptionHandling) -> exceptionHandling
-////                .authenticationEntryPoint(authenticationEntryPoint)
-////                .accessDeniedHandler(accessDeniedHandler)
-////        );
-//
-//        // 권한 규칙 작성
-//        http.authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers(AUTH_WHITELIST).permitAll()
-//                        //@PreAuthrization을 사용할 것이기 때문에 모든 경로에 대한 인증처리는 Pass
-//                        .anyRequest().permitAll()
-////                        .anyRequest().authenticated()
-//        );
-//
-//        return http.build();
-//    }
-//
-//}
+package com.hisujung.microservice.config;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+@Configuration
+@RequiredArgsConstructor
+@EnableWebSecurity
+public class SecurityConfig {
+
+    private static final String[] AUTH_WHITELIST = {
+            "/portfolio/**"
+    };
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // CSRF 비활성화
+        http.csrf(csrf -> csrf.disable());
+
+        // CORS 설정
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+
+        // 세션 관리 상태 없음으로 구성, Spring Security가 세션 생성 or 사용 X
+        // http.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        // FormLogin, BasicHttp 비활성화
+        http.formLogin(form -> form.disable());
+        http.httpBasic(httpBasic -> httpBasic.disable());
+
+        // 권한 규칙 작성
+        http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(AUTH_WHITELIST).permitAll()
+                .anyRequest().permitAll()
+        );
+
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedMethod("GET");
+        configuration.addAllowedMethod("POST");
+        configuration.addAllowedMethod("PUT");
+        configuration.addAllowedMethod("DELETE");
+        configuration.addAllowedMethod("OPTIONS");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+}
