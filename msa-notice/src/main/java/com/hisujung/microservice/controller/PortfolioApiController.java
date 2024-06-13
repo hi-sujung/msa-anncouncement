@@ -41,7 +41,7 @@ public class PortfolioApiController {
 
     public List<UnivActListResponseDto> fetchNoticeCheckedList(String memberId) {
         RestTemplate restTemplate = new RestTemplate();
-        String url = portfolioMsUrl+"notice/univactivity/checked-list?memberId=" + memberId;
+        String url = portfolioMsUrl+"notice/univactivity/auth/checked-list?memberId=" + memberId;
 
         ResponseEntity<List<UnivActListResponseDto>> response = restTemplate.exchange(
                 url,
@@ -55,7 +55,7 @@ public class PortfolioApiController {
 
 
     // 처리율 제한 장치 적용하려는 API
-    @PostMapping(path="/create-by-ai", headers = "X-Authoization-Id")
+    @PostMapping(path="/auth/create-by-ai", headers = "X-Authoization-Id")
     public ApiResponse<PortfolioSaveRequestDto> createByAi(@RequestHeader("X-Authoization-Id") String memberId, @RequestParam String careerField, @RequestParam String title) throws JsonProcessingException {
 
         //String memberId = auth.getName();
