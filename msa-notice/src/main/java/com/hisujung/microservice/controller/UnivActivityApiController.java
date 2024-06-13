@@ -46,7 +46,8 @@ public class UnivActivityApiController {
     @PostMapping(path= "/auth/like", headers = "X-Authoization-Id")
     public Long saveLike(@RequestParam Long actId, @RequestHeader("X-Authoization-Id") String memberId) {
         //String memberId = auth.getName();
-        return univActService.saveLike(actId, memberId);
+        univActService.saveLike(actId, memberId);
+        return actId;
     }
 
     //교내 공지사항 상세페이지 조회
@@ -74,7 +75,8 @@ public class UnivActivityApiController {
     //====== 대외활동 참여 체크 눌렀을 때 =======
     @PostMapping(path= "/auth/check", headers = "X-Authoization-Id")
     public Long saveCheck(@RequestHeader("X-Authoization-Id") String memberId, @RequestParam Long actId) {
-        return univActService.saveCheck(actId, memberId);
+        univActService.saveCheck(actId, memberId);
+        return actId;
     }
 
     @DeleteMapping(path= "/auth/check-cancel", headers = "X-Authoization-Id")
