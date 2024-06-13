@@ -48,5 +48,5 @@ jobs:
       - name: Build and push Docker image
         run: |
           cd msa-notice
-          docker build -t ${{ secrets.DOCKERHUB_NAME }}/msa-notice:latest .
-          docker push ${{ secrets.DOCKERHUB_NAME }}/msa-notice:latest
+          docker build -t ${{ secrets.DOCKERHUB_NAME }}/msa-notice:v4 .
+          docker push ${{ secrets.DOCKERHUB_NAME }}/msa-notice:v4
