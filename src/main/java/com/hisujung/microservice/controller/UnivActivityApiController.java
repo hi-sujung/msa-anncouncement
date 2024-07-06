@@ -43,20 +43,21 @@ public class UnivActivityApiController {
     }
 
     //========회원이 교내 공지사항 좋아요 눌렀을 때========
-    @PostMapping(path= "/like", headers = "X-Authoization-Id")
+    @PostMapping(path= "/auth/like", headers = "X-Authoization-Id")
     public Long saveLike(@RequestParam Long actId, @RequestHeader("X-Authoization-Id") String memberId) {
         //String memberId = auth.getName();
-        return univActService.saveLike(actId, memberId);
+        univActService.saveLike(actId, memberId);
+        return actId;
     }
 
     //교내 공지사항 상세페이지 조회
-    @GetMapping(path= "/id", headers = "X-Authoization-Id")
+    @GetMapping(path= "/auth/id", headers = "X-Authoization-Id")
     public UnivActListResponseDto findById(@RequestParam Long actId, @RequestHeader("X-Authoization-Id") String memberId) {
         return univActService.findById(memberId, actId);
     }
 
     //교내 공지사항 좋아요 취소
-    @DeleteMapping(path= "/like-cancel", headers = "X-Authoization-Id")
+    @DeleteMapping(path= "/auth/like-cancel", headers = "X-Authoization-Id")
     public Long deleteLike(@RequestParam Long id, @RequestHeader("X-Authoization-Id") String memberId) {
         //String memberId = auth.getName();
         univActService.deleteLike(memberId, id);
@@ -64,7 +65,7 @@ public class UnivActivityApiController {
     }
 
     //회원의 교내 공지사항 좋아요 목록
-    @GetMapping(path= "/like-list", headers = "X-Authoization-Id")
+    @GetMapping(path= "/auth/like-list", headers = "X-Authoization-Id")
     public List<UnivActListResponseDto> findByUser(@RequestHeader("X-Authoization-Id") String memberId) {
         //String memberId = auth.getName();
         return univActService.findByUser(memberId);
@@ -72,18 +73,19 @@ public class UnivActivityApiController {
 
 
     //====== 대외활동 참여 체크 눌렀을 때 =======
-    @PostMapping(path= "/check", headers = "X-Authoization-Id")
+    @PostMapping(path= "/auth/check", headers = "X-Authoization-Id")
     public Long saveCheck(@RequestHeader("X-Authoization-Id") String memberId, @RequestParam Long actId) {
-        return univActService.saveCheck(actId, memberId);
+        univActService.saveCheck(actId, memberId);
+        return actId;
     }
 
-    @DeleteMapping(path= "/check-cancel", headers = "X-Authoization-Id")
+    @DeleteMapping(path= "/auth/check-cancel", headers = "X-Authoization-Id")
     public Long deleteCheck(@RequestHeader("X-Authoization-Id") String memberId, @RequestParam Long id) {
         univActService.deleteCheck(memberId, id);
         return id;
     }
 
-    @GetMapping(path= "/checked-list", headers = "X-Authoization-Id")
+    @GetMapping(path= "/auth/checked-list", headers = "X-Authoization-Id")
     public List<UnivActListResponseDto> findCheckedByMember(@RequestHeader("X-Authoization-Id") String memberId) {
         return univActService.findCheckedByUser(memberId);
     }
