@@ -23,7 +23,6 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          cd msa-notice
           chmod +x ./gradlew
           ./gradlew build
         env:
@@ -47,6 +46,5 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          cd msa-notice
-          docker build -t ${{ secrets.DOCKERHUB_NAME }}/msa-notice:latest .
-          docker push ${{ secrets.DOCKERHUB_NAME }}/msa-notice:latest
+          docker build -t ${{ secrets.DOCKERHUB_NAME }}/msa-notice:24.07.04 .
+          docker push ${{ secrets.DOCKERHUB_NAME }}/msa-notice:24.07.04
