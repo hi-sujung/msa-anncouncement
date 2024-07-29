@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface LikeExternalActRepository extends JpaRepository<LikeExternalAct, Long> {
 
     List<LikeExternalAct> findByMemberId(String memberId);
+
     @Query("SELECT l FROM LikeExternalAct l WHERE l.memberId = :m AND l.activity = :e")
     Optional<LikeExternalAct> findByMemberAndAct(@Param("m") String memberId, @Param("e") ExternalAct e);
 
