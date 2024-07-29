@@ -32,7 +32,7 @@ public class PortfolioApiController {
 
     public List<UnivActListResponseDto> fetchNoticeCheckedList(String memberId) {
         RestTemplate restTemplate = new RestTemplate();
-        String url = portfolioMsUrl+"notice/univactivity/checked-list?memberId=" + memberId;
+        String url = portfolioMsUrl+"notice/univactivity/auth/checked-list?memberId=" + memberId;
 
         ResponseEntity<List<UnivActListResponseDto>> response = restTemplate.exchange(
                 url,
