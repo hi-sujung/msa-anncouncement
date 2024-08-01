@@ -11,14 +11,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -31,6 +35,7 @@ public class ExtActService {
     private final ExternalActRepository externalActRepository;
     private final LikeExternalActRepository likeExternalActRepository;
     private final ParticipateExRepository participateExRepository;
+    private final RestTemplate restTemplate;
 
     @Value("${external.recommendation.url}")
     private String ExtRecommendationUrl;
@@ -130,17 +135,41 @@ public class ExtActService {
         externalActRepository.save(extActCrawlingDto.toEntity());
     }
 
-    //추천 교외 공지사항 조회
-    public List<ExtRecommendDto> getRecommendExternalAct(Long id) {
-        // 교내 상세 공지사항의 department(학과)와 데드라인으로 데이터 필터링
-        List<ExternalAct> filteredActivities = externalActRepository.findExternalActWithOrdering(id);
+//    //추천 교외 공지사항 조회
+//    public List<ExtRecommendDto> getRecommendExternalAct(Long id) {
+//        // 교내 상세 공지사항의 department(학과)와 데드라인으로 데이터 필터링
+//        List<ExternalAct> filteredActivities = externalActRepository.findExternalActWithOrdering(id);
+//
+//        // 추천시스템 ms에 필터링한 데이터를 보낸다.
+//        return List.of(sendActToRecommend(filteredActivities));
+//    }
+//
+//    private ExtRecommendDto[] sendActToRecommend(List<ExternalAct> filteredActivities) {
+//        RestTemplate restTemplate = new RestTemplate();
+//        return restTemplate.postForObject(ExtRecommendationUrl, ExtRecommendDto.toDtoList(filteredActivities), ExtRecommendDto[].class);
+//    }
 
-        // 추천시스템 ms에 필터링한 데이터를 보낸다.
-        return List.of(sendActToRecommend(filteredActivities));
+    @Cacheable(value = "recommendExtCache", key = "#id", condition = "#id != null")
+    @Transactional(readOnly = true) // 트랜잭션 경계 설정
+    public CompletableFuture<List<ExtRecommendDto>> getRecommendExternalAct(Long id) {
+        return fetchRecommendationsAsync(id).thenApply(Arrays::asList);
     }
 
-    private ExtRecommendDto[] sendActToRecommend(List<ExternalAct> filteredActivities) {
-        RestTemplate restTemplate = new RestTemplate();
-        return restTemplate.postForObject(ExtRecommendationUrl, ExtRecommendDto.toDtoList(filteredActivities), ExtRecommendDto[].class);
+    @Async
+    public CompletableFuture<ExtRecommendDto[]> fetchRecommendationsAsync(Long id) {
+        log.info("Async ext processing for id: {}", id);
+
+        // 추천시스템 전송 데이터 필터링
+        List<ExternalAct> filteredActivities = externalActRepository.findExternalActWithOrdering(id);
+
+        // 비동기로 추천시스템에 필터링한 데이터 전송 후 응답 받음
+        return sendActToRecommend(filteredActivities);
+    }
+
+    // 추천시스템 ms에 필터링된 데이터를 보내고 응답을 받는 비동기 메서드
+    @Async
+    public CompletableFuture<ExtRecommendDto[]> sendActToRecommend(List<ExternalAct> filteredActivities) {
+        ExtRecommendDto[] recommendations = restTemplate.postForObject(ExtRecommendationUrl, ExtRecommendDto.toDtoList(filteredActivities), ExtRecommendDto[].class);
+        return CompletableFuture.completedFuture(recommendations);
     }
 }

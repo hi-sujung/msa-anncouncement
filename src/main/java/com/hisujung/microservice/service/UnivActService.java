@@ -8,14 +8,18 @@ import com.hisujung.microservice.repository.UnivActivityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,6 +32,8 @@ public class UnivActService {
     private final UnivActivityRepository univActivityRepository;
     private final LikeUnivActRepository likeUnivActRepository;
     private final ParticipateUnivRepository participateUnivRepository;
+    private final RestTemplate restTemplate;
+
 
     @Value("${univ.recommendation.url}")
     private String univRecommendationUrl;
@@ -141,17 +147,39 @@ public class UnivActService {
     }
 
     //추천 교내 공지사항 조회
-    public List<UnivRecommendDto> getRecommendUnivAct(Long id) {
-        // 추천시스템 전송 데이터 필터링
-        List<UnivActivity> filteredActivities  = univActivityRepository.findUnivActWithOrdering(id);
+//    public List<UnivRecommendDto> getRecommendUnivAct(Long id) {
+//        // 추천시스템 전송 데이터 필터링
+//        List<UnivActivity> filteredActivities  = univActivityRepository.findUnivActWithOrdering(id);
+//
+//        // 추천시스템에 필터링한 데이터 전송 후 응답 받음
+//        return List.of(sendActToRecommend(filteredActivities));
+//    }
+//
+//    // 추천시스템 ms에 필터링된 데이터를 보내고 응답을 받는 메서드
+//    private UnivRecommendDto[] sendActToRecommend(List<UnivActivity> filteredActivities) {
+//        RestTemplate restTemplate = new RestTemplate();
+//        return restTemplate.postForObject(univRecommendationUrl, UnivRecommendDto.toDtoList(filteredActivities), UnivRecommendDto[].class);
+//    }
 
-        // 추천시스템에 필터링한 데이터 전송 후 응답 받음
-        return List.of(sendActToRecommend(filteredActivities));
+    @Cacheable(value = "recommendUnivCache", key = "#id", condition = "#id != null")
+    public CompletableFuture<List<UnivRecommendDto>> getRecommendUnivAct(Long id) {
+        return fetchUnivRecommendationsAsync(id).thenApply(Arrays::asList);
     }
 
-    // 추천시스템 ms에 필터링된 데이터를 보내고 응답을 받는 메서드
-    private UnivRecommendDto[] sendActToRecommend(List<UnivActivity> filteredActivities) {
-        RestTemplate restTemplate = new RestTemplate();
-        return restTemplate.postForObject(univRecommendationUrl, UnivRecommendDto.toDtoList(filteredActivities), UnivRecommendDto[].class);
+    @Async
+    public CompletableFuture<UnivRecommendDto[]> fetchUnivRecommendationsAsync(Long id) {
+        log.info("Async univ processing for id: {}", id);
+
+        // 추천시스템 전송 데이터 필터링
+        List<UnivActivity> filteredActivities = univActivityRepository.findUnivActWithOrdering(id);
+
+        // 비동기로 추천시스템에 필터링한 데이터 전송 후 응답 받음
+        return sendActToRecommend(filteredActivities);
+    }
+
+    @Async
+    public CompletableFuture<UnivRecommendDto[]> sendActToRecommend(List<UnivActivity> filteredActivities) {
+        UnivRecommendDto[] recommendations = restTemplate.postForObject(univRecommendationUrl, UnivRecommendDto.toDtoList(filteredActivities), UnivRecommendDto[].class);
+        return CompletableFuture.completedFuture(recommendations);
     }
 }

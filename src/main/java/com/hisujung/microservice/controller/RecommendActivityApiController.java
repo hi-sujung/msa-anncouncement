@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,13 +23,13 @@ public class RecommendActivityApiController {
 
     //교내 추천 공지사항 조회
     @GetMapping("/recommend/univ")
-    public List<UnivRecommendDto> getRecommendUnivAct(@RequestParam("activity_name") Long id){
-        return univActService.getRecommendUnivAct(id);
+    public List<UnivRecommendDto> getRecommendUnivAct(@RequestParam("activity_name") Long id) throws ExecutionException, InterruptedException {
+        return univActService.getRecommendUnivAct(id).get();
     }
 
     //교외 추천 공지사항 조회
     @GetMapping("/recommend/external")
-    public List<ExtRecommendDto> getRecommendExtAct(@RequestParam("activity_name") Long id){
-        return extActService.getRecommendExternalAct(id);
+    public List<ExtRecommendDto> getRecommendExtAct(@RequestParam("activity_name") Long id) throws InterruptedException, ExecutionException {
+        return extActService.getRecommendExternalAct(id).get();
     }
 }
